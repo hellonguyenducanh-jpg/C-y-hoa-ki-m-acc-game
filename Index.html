@@ -3,197 +3,308 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Garden Quest - Đức Anh Thu Sâm</title>
-    <style>
-        :root { --primary: #27ae60; --dark: #2c3e50; --danger: #e74c3c; }
-        body { font-family: 'Segoe UI', sans-serif; background: #96e6a1; margin: 0; display: flex; justify-content: center; min-height: 100vh; padding: 20px; }
-        .main-card { background: white; width: 100%; max-width: 400px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden; position: relative; padding-bottom: 20px;}
-        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: #f8f9fa; }
-        .user-avatar { width: 40px; height: 40px; background: #ddd; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-        .header { background: var(--primary); color: white; padding: 20px; text-align: center; }
-        .stats-section { padding: 20px; text-align: center; }
-        .score-circle { width: 100px; height: 100px; border: 5px solid #eee; border-top: 5px solid orange; border-radius: 50%; margin: 10px auto; display: flex; flex-direction: column; justify-content: center; }
-        .garden-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .plant-card { background: #fff; border: 1px solid #eee; padding: 10px; border-radius: 15px; cursor: pointer; font-weight: bold; }
-        
-        /* GIAO DIỆN NHIỆM VỤ NGƯỜI MỚI GIỐNG CŨ */
-        .newbie-tasks { background: #fffde7; padding: 15px; border-radius: 15px; border: 2px solid #fbc02d; margin: 0 20px; text-align: left; }
-        .newbie-tasks h4 { margin: 0 0 10px 0; color: #f57f17; }
-        .task-item { background: white; padding: 10px; border-radius: 10px; margin-bottom: 8px; border: 1px solid #fff9c4; font-size: 13px; }
-        .task-actions { display: flex; gap: 5px; margin-top: 5px; }
-        .btn-link { background: #2196F3; color: white; border: none; padding: 5px 8px; border-radius: 5px; cursor: pointer; font-size: 11px; text-decoration: none; flex: 1; text-align: center; display: block; }
-        .btn-verify { background: #f57f17; color: white; border: none; padding: 5px 8px; border-radius: 5px; cursor: pointer; font-size: 11px; flex: 1; display: none; }
-        .btn-done-status { background: #ccc; color: white; border: none; padding: 5px 8px; border-radius: 5px; cursor: not-allowed; font-size: 11px; width: 100%; margin-top: 5px; }
+    <title>PTG Bank - Professional Receipt</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/jsqr/dist/jsQR.js"></script>
 
-        .modal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 100; padding: 20px; box-sizing: border-box; }
-        .modal-active { display: block; animation: slideIn 0.3s; }
-        @keyframes slideIn { from { transform: translateY(-100%); } to { transform: translateY(0); } }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-bottom: 10px; }
-        .btn-main { background: var(--primary); color: white; }
+    <style>
+        :root { --primary: #004aad; --accent: #ffcc00; --bg: #f4f7f6; --success: #28a745; --dark: #1a1a1a; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        body { background: #121212; margin: 0; display: flex; justify-content: center; }
+        .app-frame { width: 100%; max-width: 414px; height: 100vh; background: var(--bg); position: relative; overflow: hidden; box-shadow: 0 0 40px rgba(0,0,0,0.5); }
+        .screen { display: none; padding: 20px; height: 100%; overflow-y: auto; }
+        .active { display: block; }
+        
+        /* GIAO DIỆN BIÊN LAI MỚI (STYLE NGÂN HÀNG) */
+        .receipt-container { background: white; border-radius: 20px; padding: 0; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-top: 10px; }
+        .receipt-header { background: linear-gradient(135deg, #004aad, #00c6ff); color: white; text-align: center; padding: 30px 20px; }
+        .receipt-header .icon-check { width: 60px; height: 60px; background: white; color: var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; margin: 0 auto 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .receipt-header h2 { margin: 0; font-size: 18px; text-transform: uppercase; letter-spacing: 1px; }
+        .receipt-header .amount { font-size: 32px; font-weight: 800; margin: 10px 0; }
+        
+        .receipt-body { padding: 20px; background: #fff; }
+        .receipt-row { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid #f0f0f0; padding-bottom: 8px; }
+        .receipt-row span { color: #777; font-size: 13px; }
+        .receipt-row b { color: var(--dark); font-size: 14px; text-align: right; }
+        .receipt-footer { padding: 15px; text-align: center; background: #f9f9f9; border-top: 1px dashed #ddd; }
+        .bank-logo-text { font-weight: 900; color: var(--primary); letter-spacing: -1px; font-size: 20px; }
+
+        /* GIỮ NGUYÊN CSS CŨ */
+        input { width: 100%; padding: 14px; margin: 8px 0; border-radius: 10px; border: 1px solid #ddd; font-size: 16px; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; background: var(--primary); color: white; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 16px; }
+        .card-main { background: linear-gradient(135deg, #004aad, #00c6ff); color: white; padding: 25px; border-radius: 20px; margin: 15px 0; }
+        #loader-screen { display: none; position: absolute; inset: 0; background: rgba(255,255,255,0.9); z-index: 1000; flex-direction: column; align-items: center; justify-content: center; }
+        .spinner { width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .grid-nav { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 20px; }
+        .nav-box { text-align: center; font-size: 10px; font-weight: 600; cursor: pointer; }
+        .nav-icon { background: white; width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 5px; font-size: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .bell-box { position: relative; font-size: 24px; cursor: pointer; }
+        .bell-badge { position: absolute; top: -5px; right: -5px; background: red; color: white; font-size: 10px; padding: 2px 5px; border-radius: 50%; }
+        .notif-item { background: white; padding: 12px; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid var(--primary); }
     </style>
 </head>
 <body>
 
-<div class="main-card">
-    <div class="top-bar">
-        <div class="user-avatar" onclick="toggleModal('auth-modal')">👤</div>
-        <div id="username-display" style="font-weight: bold; color: var(--primary);">Khách</div>
+<div class="app-frame">
+    <div id="loader-screen"><div class="spinner"></div><p id="loader-text">PTG Bank...</p></div>
+
+    <input type="file" id="qr-input" accept="image/*" style="display:none" onchange="readQRFromFile(this)">
+
+    <div id="scr-login" class="screen active">
+        <h2 style="color: var(--primary); text-align: center; margin-top: 40px;">ĐĂNG NHẬP PTG</h2>
+        <input type="tel" id="login-phone" placeholder="Số điện thoại">
+        <input type="password" id="login-pin" placeholder="Mã PIN">
+        <button class="btn" onclick="handleLogin()">ĐĂNG NHẬP</button>
+        <p style="text-align: center; font-size: 14px;">Chưa có tài khoản? <a href="#" onclick="showPage('scr-reg')">Đăng ký</a></p>
     </div>
 
-    <div class="header">
-        <h2 style="margin:0">Vườn Cây Acc Free</h2>
-        <small id="current-date"></small>
+    <div id="scr-reg" class="screen">
+        <h2 style="color: var(--primary); text-align: center;">MỞ TÀI KHOẢN</h2>
+        <input type="text" id="reg-name" placeholder="Họ và tên">
+        <input type="tel" id="reg-phone" placeholder="Số điện thoại">
+        <input type="password" id="reg-pin" placeholder="Mã PIN">
+        <button class="btn" onclick="processReg()">NHẬN OTP</button>
+        <button class="btn" style="background:#666" onclick="showPage('scr-login')">QUAY LẠI</button>
     </div>
 
-    <div class="stats-section">
-        <div class="score-circle">
-            <span id="score-num" style="font-size: 24px; font-weight: bold;">0</span>
-            <span style="font-size: 10px;">/ 200 ĐIỂM</span>
-        </div>
-        <p style="font-weight:bold; color: #d35400;">Lượt hôm nay: <span id="tasks-left">4</span>/4</p>
-        <div class="garden-grid">
-            <button class="plant-card" onclick="grow(3)">🥬 Cải (+3)</button>
-            <button class="plant-card" onclick="grow(5)">🍆 Cà Tím (+5)</button>
-            <button class="plant-card" onclick="grow(7)">🍅 Cà Chua (+7)</button>
-            <button class="plant-card" onclick="grow(10)">🥕 Cà Rốt (+10)</button>
-        </div>
+    <div id="scr-otp" class="screen">
+        <h3>Xác thực OTP</h3>
+        <input type="number" id="otp-code" placeholder="Nhập mã 6 số">
+        <button class="btn" onclick="verifyOTP()">XÁC NHẬN</button>
     </div>
 
-    <div class="newbie-tasks">
-        <h4>🎁 Nhiệm vụ người mới</h4>
-        
-        <div class="task-item" id="task-yt-box">
-            <span>1. Đăng ký YouTube Admin</span>
-            <div class="task-actions" id="yt-actions">
-                <a href="https://youtube.com/@nhancodeptg05" target="_blank" class="btn-link" onclick="showVerify('yt')">Mở Link YouTube</a>
-                <button id="yt-verify" class="btn-verify" onclick="completeTask('yt')">Xác Nhận Đã Đăng Ký</button>
+    <div id="scr-home" class="screen">
+        <div style="display:flex; justify-content: space-between; align-items:center;">
+            <b id="hi-name">USER</b>
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <div class="bell-box" onclick="showNotifications()">
+                    🔔<span id="notif-count" class="bell-badge" style="display:none">0</span>
+                </div>
+                <span onclick="handleLogout()" style="color:red; font-size: 12px; cursor:pointer; font-weight:bold;">THOÁT</span>
             </div>
         </div>
-
-        <div class="task-item" id="task-tt-box">
-            <span>2. Follow TikTok Admin</span>
-            <div class="task-actions" id="tt-actions">
-                <a href="https://www.tiktok.com/@thusamplay_2410" target="_blank" class="btn-link" onclick="showVerify('tt')">Mở Link TikTok</a>
-                <button id="tt-verify" class="btn-verify" onclick="completeTask('tt')">Xác Nhận Đã Follow</button>
-            </div>
+        <div class="card-main">
+            <small style="opacity: 0.8;">Số dư khả dụng</small>
+            <h1 id="bal-val">0 ₫</h1>
+            <p id="stk-val" style="letter-spacing: 2px; font-size: 14px;">STK: --------</p>
         </div>
-        <p id="social-msg" style="font-size: 10px; color: #888; text-align: center; margin-top: 5px;">Làm cả 2 nhiệm vụ để nhận tổng 9 điểm.</p>
+        <div class="grid-nav">
+            <div class="nav-box" onclick="showTransfer()"><div class="nav-icon">💸</div>Chuyển tiền</div>
+            <div class="nav-box" onclick="document.getElementById('qr-input').click()"><div class="nav-icon">📸</div>Quét mã QR</div>
+            <div class="nav-box" onclick="mockDeposit()"><div class="nav-icon">🏦</div>Nạp tiền</div>
+            <div class="nav-box" onclick="alert('Đang bảo trì!')"><div class="nav-icon">📱</div>Nạp thẻ</div>
+        </div>
+        <div id="qr-code" style="margin-top: 30px; display: flex; justify-content: center; background: white; padding: 20px; border-radius: 20px;"></div>
     </div>
 
-    <div id="auth-modal" class="modal">
-        <h3 id="auth-title">Đăng Ký Tài Khoản</h3>
-        <input type="text" id="auth-user" placeholder="Tên đăng nhập">
-        <input type="password" id="auth-pass" placeholder="Mật khẩu">
-        <button class="btn btn-main" onclick="handleAuth()">Xác Nhận</button>
-        <button class="btn" style="background:#eee" onclick="switchAuth()">Chuyển sang Đăng nhập / Đăng ký</button>
-        <button class="btn" style="background:var(--danger); color:white" onclick="toggleModal('auth-modal')">Đóng</button>
+    <div id="scr-notif" class="screen">
+        <div style="display:flex; justify-content: space-between; align-items:center;"><h3>Thông báo</h3><button onclick="showPage('scr-home')" style="border:none; background:none; color:var(--primary); font-weight:bold;">Đóng</button></div>
+        <div id="notif-list"></div>
+    </div>
+
+    <div id="scr-transfer" class="screen">
+        <div style="display:flex; justify-content: space-between; align-items:center;">
+            <h3>Chuyển khoản</h3>
+            <button class="btn" style="width:auto; padding:5px 15px; margin:0; font-size:11px" onclick="document.getElementById('qr-input').click()">DÙNG ẢNH QR</button>
+        </div>
+        <input type="text" id="to-stk" placeholder="STK người nhận" oninput="autoCheckSTK()">
+        <div id="display-receiver-name" style="font-size: 13px; font-weight: bold; color: var(--primary); margin: -5px 0 10px 5px; display: none;"></div>
+        <input type="number" id="to-amount" placeholder="Số tiền">
+        <input type="password" id="confirm-pin" placeholder="Mã PIN">
+        <button class="btn" onclick="startTransfer()">CHUYỂN TIỀN</button>
+        <button class="btn" style="background:#666" onclick="showPage('scr-home')">HỦY</button>
+    </div>
+
+    <div id="scr-receipt" class="screen">
+        <div class="receipt-container" id="receipt-content"></div>
+        <button class="btn" style="margin-top: 20px;" onclick="showPage('scr-home')">VỀ TRANG CHỦ</button>
+        <button class="btn" style="background: #e9ecef; color: #333; margin-top: 10px;" onclick="window.print()">CHIA SẺ BIÊN LAI</button>
     </div>
 </div>
 
 <script>
-    const API_URL = "https://sheetdb.io/api/v1/rcuexwt4g47ql"; 
+    // --- FIREBASE CONFIG (GIỮ NGUYÊN) ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyAMxWXDkmGiVKfT8NYcMg3Pp_ENaI43etk",
+      authDomain: "ptg-bank.firebaseapp.com",
+      databaseURL: "https://ptg-bank-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "ptg-bank",
+      storageBucket: "ptg-bank.firebasestorage.app",
+      messagingSenderId: "703065593760",
+      appId: "1:703065593760:web:707be5623bbf9cf2dfb6c5"
+    };
     
-    let users = JSON.parse(localStorage.getItem('garden_users')) || {};
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
     let currentUser = null;
-    let isLoginMode = false;
-    let userData = { score: 0, tasksDone: 0, ytDone: false, ttDone: false, socialAwarded: false };
+    let tempRegData = null;
+    let correctOTP = "";
+    let validatedReceiverName = "";
+    let validatedReceiverPhone = "";
 
-    document.getElementById('current-date').innerText = new Date().toLocaleDateString('vi-VN');
-
-    function toggleModal(id) { document.getElementById(id).classList.toggle('modal-active'); }
-    function switchAuth() {
-        isLoginMode = !isLoginMode;
-        document.getElementById('auth-title').innerText = isLoginMode ? "Đăng Nhập" : "Đăng Ký Tài Khoản";
+    // LOGIC ĐỌC QR TỪ FILE (THÊM MỚI)
+    function readQRFromFile(input) {
+        if (!input.files || !input.files[0]) return;
+        loading(true);
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement("canvas");
+                const ctx = canvas.getContext("2d");
+                canvas.width = img.width; canvas.height = img.height;
+                ctx.drawImage(img, 0, 0, img.width, img.height);
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const code = jsQR(imageData.data, imageData.width, imageData.height);
+                loading(false);
+                if (code) {
+                    showPage('scr-transfer');
+                    document.getElementById('to-stk').value = code.data;
+                    autoCheckSTK();
+                } else alert("Không tìm thấy mã QR hợp lệ trong ảnh!");
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(input.files[0]);
+        input.value = ""; // Reset để chọn lại cùng một ảnh nếu cần
     }
 
-    function handleAuth() {
-        const u = document.getElementById('auth-user').value.trim();
-        const p = document.getElementById('auth-pass').value.trim();
-        if(!u || !p) return alert("Vui lòng điền đủ!");
+    // LOGIC CHUYỂN TIỀN VÀ TẠO BIÊN LAI XỊN (GIỮ NGUYÊN)
+    function startTransfer() {
+        const amt = parseInt(document.getElementById('to-amount').value);
+        const pin = document.getElementById('confirm-pin').value;
+        const toStk = document.getElementById('to-stk').value;
 
-        if (isLoginMode) {
-            if (users[u] && users[u].pass === p) {
-                currentUser = u;
-                userData = users[u];
-            } else { return alert("Sai tài khoản hoặc mật khẩu!"); }
-        } else {
-            if (users[u]) return alert("Tên đã tồn tại!");
-            currentUser = u;
-            // ÉP ĐIỂM VỀ 0 KHI ĐĂNG KÝ
-            userData = { pass: p, score: 0, tasksDone: 0, ytDone: false, ttDone: false, socialAwarded: false };
-            users[u] = userData;
-            syncWithAdmin("Đăng ký mới");
-        }
-        document.getElementById('username-display').innerText = currentUser;
-        saveData();
-        updateUI();
-        toggleModal('auth-modal');
-    }
+        if(!validatedReceiverPhone) return alert("STK không đúng!");
+        if(pin !== currentUser.pin) return alert("Sai mã PIN!");
+        if(amt > currentUser.balance) return alert("Số dư không đủ!");
 
-    function showVerify(type) {
-        if (!currentUser) return alert("Bạn cần Đăng ký trước!");
-        document.getElementById(type + '-verify').style.display = 'block';
-    }
+        loading(true);
+        const now = new Date();
+        const timeStr = now.getHours() + ":" + now.getMinutes().toString().padStart(2, '0') + " - " + now.getDate() + "/" + (now.getMonth()+1) + "/" + now.getFullYear();
+        const transID = "PTG" + Math.random().toString(36).substr(2, 9).toUpperCase();
 
-    function completeTask(type) {
-        if (type === 'yt') userData.ytDone = true;
-        if (type === 'tt') userData.ttDone = true;
+        db.ref('users/' + currentUser.phone + '/balance').transaction(b => (b || 0) - amt).then(() => {
+            db.ref('users/' + validatedReceiverPhone + '/balance').transaction(b => (b || 0) + amt).then(() => {
+                
+                sendNotification(currentUser.phone, "Chuyển tiền thành công", `-${amt.toLocaleString()}₫ tới ${validatedReceiverName}`);
+                sendNotification(validatedReceiverPhone, "Nhận tiền từ " + currentUser.name, `+${amt.toLocaleString()}₫`);
 
-        if (userData.ytDone && userData.ttDone && !userData.socialAwarded) {
-            userData.score += 9;
-            userData.socialAwarded = true;
-            alert("Chúc mừng! Bạn đã hoàn thành 2 nhiệm vụ và nhận 9 điểm.");
-            syncWithAdmin("Nhận 9đ Social");
-        } else {
-            alert("Đã xác nhận! Hãy làm nốt nhiệm vụ còn lại để nhận 9 điểm.");
-        }
-        saveData();
-        updateUI();
-    }
-
-    function grow(pts) {
-        if (!currentUser) return alert("Hãy đăng ký trước!");
-        if (userData.tasksDone < 4) {
-            userData.score += pts;
-            userData.tasksDone++;
-            saveData();
-            updateUI();
-            syncWithAdmin("Trồng cây");
-        } else { alert("Hết lượt hôm nay!"); }
-    }
-
-    function updateUI() {
-        if (!currentUser) return;
-        document.getElementById('score-num').innerText = userData.score;
-        document.getElementById('tasks-left').innerText = 4 - userData.tasksDone;
-
-        if (userData.socialAwarded) {
-            document.getElementById('yt-actions').innerHTML = '<button class="btn-done-status">Đã xong ✅</button>';
-            document.getElementById('tt-actions').innerHTML = '<button class="btn-done-status">Đã xong ✅</button>';
-        } else {
-            if (userData.ytDone) document.getElementById('yt-verify').innerText = "Đã xác nhận YouTube";
-            if (userData.ttDone) document.getElementById('tt-verify').innerText = "Đã xác nhận TikTok";
-        }
-    }
-
-    function saveData() {
-        if (currentUser) users[currentUser] = userData;
-        localStorage.setItem('garden_users', JSON.stringify(users));
-    }
-
-    function syncWithAdmin(action) {
-        fetch(API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                "Username": currentUser,
-                "Score": userData.score,
-                "Date": new Date().toLocaleString('vi-VN'),
-                "Note": action
-            })
+                document.getElementById('receipt-content').innerHTML = `
+                    <div class="receipt-header">
+                        <div class="icon-check">✔</div>
+                        <h2>Giao dịch thành công</h2>
+                        <div class="amount">${amt.toLocaleString()} VND</div>
+                        <div style="font-size:12px; opacity:0.8">${timeStr}</div>
+                    </div>
+                    <div class="receipt-body">
+                        <div class="receipt-row"><span>Tên người hưởng</span><b>${validatedReceiverName.toUpperCase()}</b></div>
+                        <div class="receipt-row"><span>Tài khoản thụ hưởng</span><b>${toStk}</b></div>
+                        <div class="receipt-row"><span>Ngân hàng thụ hưởng</span><b>PTG DIGITAL BANK</b></div>
+                        <div class="receipt-row"><span>Mã giao dịch</span><b>${transID}</b></div>
+                        <div class="receipt-row" style="border:none"><span>Nội dung</span><b>${currentUser.name.toUpperCase()} CHUYEN TIEN</b></div>
+                    </div>
+                    <div class="receipt-footer">
+                        <div class="bank-logo-text">PTG BANK</div>
+                        <div style="font-size:10px; color:#aaa; margin-top:5px;">Giao dịch được thực hiện bởi hệ thống PTG Secure</div>
+                    </div>
+                `;
+                
+                loading(false);
+                showPage('scr-receipt');
+            });
         });
     }
+
+    // --- CÁC HÀM CƠ BẢN (KHÔNG ĐỔI) ---
+    function startUserSession(phone) {
+        db.ref('users/' + phone).on('value', s => {
+            if(s.exists()) {
+                if (!currentUser) { currentUser = s.val(); initHome(); } 
+                else { currentUser = s.val(); updateUI(); }
+            }
+        });
+        db.ref('notifications/' + phone).on('value', s => {
+            const list = document.getElementById('notif-list'); list.innerHTML = "";
+            let unread = 0;
+            if(s.exists()) {
+                s.forEach(c => {
+                    if(!c.val().read) unread++;
+                    list.innerHTML = `<div class="notif-item"><b>${c.val().title}</b><p style="margin:5px 0; font-size:12px">${c.val().body}</p><small>${c.val().time}</small></div>` + list.innerHTML;
+                });
+            }
+            const b = document.getElementById('notif-count');
+            b.innerText = unread; b.style.display = unread > 0 ? "block" : "none";
+        });
+    }
+
+    function sendNotification(phone, title, body) {
+        const t = new Date().getHours() + ":" + new Date().getMinutes();
+        db.ref('notifications/' + phone).push({ title, body, time: t, read: false });
+    }
+
+    function autoCheckSTK() {
+        const stk = document.getElementById('to-stk').value.trim();
+        const nb = document.getElementById('display-receiver-name');
+        if(stk.length >= 4) {
+            nb.style.display = "block"; nb.innerText = "🔍...";
+            db.ref('users').once('value').then(snap => {
+                let f = false;
+                snap.forEach(c => {
+                    if(c.val().stk === stk) {
+                        validatedReceiverName = c.val().name; validatedReceiverPhone = c.key;
+                        nb.innerText = "✅ " + c.val().name.toUpperCase(); f = true;
+                    }
+                });
+                if(!f) { validatedReceiverPhone = ""; nb.innerText = "❌ Không tồn tại"; }
+            });
+        }
+    }
+
+    window.onload = function() { const p = localStorage.getItem('ptg_phone'); if(p) startUserSession(p); };
+    function handleLogin() {
+        const p = document.getElementById('login-phone').value;
+        const pi = document.getElementById('login-pin').value;
+        db.ref('users/' + p).once('value').then(s => {
+            if(s.exists() && s.val().pin === pi) { localStorage.setItem('ptg_phone', p); startUserSession(p); } 
+            else alert("Sai thông tin!");
+        });
+    }
+    function initHome() {
+        showPage('scr-home');
+        document.getElementById('hi-name').innerText = currentUser.name.toUpperCase();
+        document.getElementById('stk-val').innerText = "STK: " + currentUser.stk;
+        updateUI();
+        document.getElementById('qr-code').innerHTML = "";
+        new QRCode(document.getElementById("qr-code"), { text: currentUser.stk, width: 140, height: 140 });
+    }
+    function updateUI() { document.getElementById('bal-val').innerText = currentUser.balance.toLocaleString() + " ₫"; }
+    function mockDeposit() {
+        let v = prompt("Nhập số tiền nạp:");
+        if(v > 0) {
+            db.ref('users/' + currentUser.phone + '/balance').transaction(b => (b||0) + parseInt(v));
+            sendNotification(currentUser.phone, "Biến động số dư", `+${parseInt(v).toLocaleString()}₫ vào tài khoản.`);
+        }
+    }
+    function showPage(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+    function showNotifications() { showPage('scr-notif'); db.ref('notifications/' + currentUser.phone).once('value', s => { s.forEach(c => { db.ref('notifications/' + currentUser.phone + '/' + c.key).update({read:true}); }); }); }
+    function handleLogout() { localStorage.removeItem('ptg_phone'); location.reload(); }
+    function showTransfer() { document.getElementById('to-stk').value = ""; showPage('scr-transfer'); }
+    function loading(s) { document.getElementById('loader-screen').style.display = s ? 'flex' : 'none'; }
+    function processReg() {
+        const n = document.getElementById('reg-name').value; const p = document.getElementById('reg-phone').value; const pi = document.getElementById('reg-pin').value;
+        db.ref('users/' + p).once('value').then(s => {
+            if(s.exists()) return alert("SĐT đã tồn tại!");
+            tempRegData = { name: n, phone: p, pin: pi, balance: 10000, stk: "PTG" + Math.floor(100000 + Math.random()*900000) };
+            correctOTP = "123456"; alert("Mã OTP: " + correctOTP); showPage('scr-otp');
+        });
+    }
+    function verifyOTP() { if(document.getElementById('otp-code').value === correctOTP) { db.ref('users/' + tempRegData.phone).set(tempRegData).then(() => showPage('scr-login')); } }
 </script>
 </body>
 </html>
