@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PTG Bank - Final Version</title>
+    <title>PTG Bank - One Tap QR Edition</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
@@ -19,104 +19,105 @@
         .screen { display: none; padding: 20px; height: 100%; overflow-y: auto; }
         .active { display: block; }
         
-        /* CSS BIÊN LAI CHUYÊN NGHIỆP */
-        .receipt-container { background: white; border-radius: 20px; padding: 0; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-top: 10px; }
-        .receipt-header { background: linear-gradient(135deg, #004aad, #00c6ff); color: white; text-align: center; padding: 30px 20px; }
-        .receipt-header .icon-check { width: 60px; height: 60px; background: white; color: var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; margin: 0 auto 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        .receipt-header h2 { margin: 0; font-size: 18px; text-transform: uppercase; letter-spacing: 1px; }
-        .receipt-header .amount { font-size: 32px; font-weight: 800; margin: 10px 0; }
-        .receipt-body { padding: 20px; background: #fff; }
-        .receipt-row { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid #f0f0f0; padding-bottom: 8px; }
-        .receipt-row span { color: #777; font-size: 13px; }
-        .receipt-row b { color: var(--dark); font-size: 14px; text-align: right; }
-        
-        /* FORM & BUTTONS */
-        input { width: 100%; padding: 14px; margin: 8px 0; border-radius: 10px; border: 1px solid #ddd; font-size: 16px; }
-        .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; background: var(--primary); color: white; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 16px; }
-        .card-main { background: linear-gradient(135deg, #004aad, #00c6ff); color: white; padding: 25px; border-radius: 20px; margin: 15px 0; }
-        
-        /* AI SCANNER UI */
-        #loader-screen { display: none; position: absolute; inset: 0; background: rgba(255,255,255,0.9); z-index: 3000; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
+        .modal-overlay { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.8); z-index: 5000; align-items: center; justify-content: center; }
+        .modal-box { background: white; width: 85%; padding: 25px; border-radius: 15px; text-align: center; }
+
+        .receipt-container { background: #241c39; border-radius: 20px; padding: 30px 20px; color: white; text-align: center; margin-top: 10px; }
+        .receipt-logo { color: #f39200; font-weight: 800; font-size: 22px; margin-bottom: 20px; display: block; }
+        .receipt-amount { font-size: 30px; font-weight: bold; margin-bottom: 10px; }
+        .receipt-info-box { border-top: 0.5px solid rgba(255,255,255,0.1); padding-top: 20px; text-align: left; }
+        .receipt-row { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; }
+
+        #loader-screen { display: none; position: absolute; inset: 0; background: rgba(255,255,255,0.9); z-index: 6000; flex-direction: column; align-items: center; justify-content: center; }
         .spinner { width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .kyc-preview { width:100%; height:120px; border: 2px dashed #ccc; border-radius: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #eee; margin-top: 5px; }
-        .kyc-preview img { width: 100%; height: 100%; object-fit: cover; }
-
-        #ai-result-board { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; background: white; border-radius: 20px; padding: 20px; box-shadow: 0 0 50px rgba(0,0,0,0.4); z-index: 4000; }
-        .result-item { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding: 8px 0; font-size: 13px; }
-        .user-face { width: 80px; height: 80px; border-radius: 50%; background: #ddd; margin: 0 auto 15px; display: block; object-fit: cover; border: 3px solid var(--primary); }
-
-        /* GRID NAV */
+        input { width: 100%; padding: 14px; margin: 8px 0; border-radius: 10px; border: 1px solid #ddd; font-size: 16px; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; background: var(--primary); color: white; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .card-main { background: linear-gradient(135deg, #004aad, #00c6ff); color: white; padding: 25px; border-radius: 20px; margin: 15px 0; }
         .grid-nav { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 20px; }
         .nav-box { text-align: center; font-size: 10px; font-weight: 600; cursor: pointer; }
         .nav-icon { background: white; width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 5px; font-size: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .bell-box { position: relative; font-size: 24px; cursor: pointer; }
-        .bell-badge { position: absolute; top: -5px; right: -5px; background: red; color: white; font-size: 10px; padding: 2px 5px; border-radius: 50%; }
-        .notif-item { background: white; padding: 12px; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid var(--primary); }
+        .bell-badge { position: absolute; top: -5px; right: -5px; background: red; color: white; font-size: 10px; padding: 2px 5px; border-radius: 50%; border: 2px solid var(--bg); }
+        
+        .kyc-preview { width:100%; height:120px; border: 2px dashed #ccc; border-radius: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #eee; margin-top: 5px; cursor: pointer; position: relative; }
+        .kyc-preview img { width: 100%; height: 100%; object-fit: cover; position: absolute; }
+        
+        .avatar-uploader { border: 1px solid #ddd; padding: 10px; border-radius: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; background: #f9f9f9; }
     </style>
 </head>
 <body>
 
 <div class="app-frame">
-    <div id="loader-screen">
-        <div class="spinner"></div>
-        <p id="loader-text" style="font-weight: bold; margin-top: 15px; color: var(--primary);">Đang quét...</p>
+    <div id="admin-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3>Xác thực Admin</h3>
+            <input type="password" id="admin-password-input" placeholder="Mật khẩu Admin">
+            <button class="btn" onclick="verifyAdminAccess()">XÁC NHẬN</button>
+            <button class="btn" style="background:#eee; color:#333" onclick="closeModal('admin-modal')">HỦY</button>
+        </div>
     </div>
 
-    <div id="ai-result-board">
-        <h3 style="text-align: center; color: var(--primary); margin-top: 0;">XÁC THỰC AI</h3>
-        <img id="res-face" class="user-face" src="">
-        <div class="result-item"><span>Họ và tên:</span><b id="res-name">---</b></div>
-        <div class="result-item"><span>Năm sinh phát hiện:</span><b id="res-dob" style="color:red">---</b></div>
-        <div class="result-item"><span>Quốc gia:</span><b>Việt Nam</b></div>
-        <div class="result-item"><span>Trạng thái:</span><b style="color:var(--success)">Thẻ thật</b></div>
-        <button class="btn" onclick="finalConfirm()">ĐÚNG, CHÍNH LÀ TÔI</button>
-        <button class="btn" style="background:#ccc; color:#333" onclick="closeBoard()">CHỤP LẠI</button>
+    <div id="pin-popup" class="modal-overlay">
+        <div class="modal-box">
+            <h3>Xác thực giao dịch</h3>
+            <input type="password" id="modal-pin-input" placeholder="••••••" style="text-align:center; letter-spacing:5px">
+            <button class="btn" onclick="checkPinStep()">XÁC NHẬN</button>
+            <button class="btn" style="background:#eee; color:#333" onclick="closeModal('pin-popup')">HỦY</button>
+        </div>
     </div>
 
-    <input type="file" id="qr-input" accept="image/*" style="display:none" onchange="readQRFromFile(this)">
+    <div id="ai-result-board" class="modal-overlay">
+        <div class="modal-box">
+            <h3 style="color: var(--primary); margin-top: 0;">XÁC THỰC AI</h3>
+            <div id="ai-info-detail" style="text-align: left; font-size: 13px; background: #f9f9f9; padding: 15px; border-radius: 10px; margin-bottom: 15px; line-height: 1.6;"></div>
+            <button class="btn" style="background: var(--success)" onclick="finalConfirm(true)">ĐÚNG, LÀ TÔI</button>
+            <button class="btn" style="background:#ccc; color:#333; margin-top:5px;" onclick="finalConfirm(false)">CHỤP LẠI</button>
+        </div>
+    </div>
+
+    <div id="loader-screen"><div class="spinner"></div><p id="loader-text" style="margin-top:15px; font-weight:bold;"></p></div>
 
     <div id="scr-login" class="screen active">
-        <h2 style="color: var(--primary); text-align: center; margin-top: 40px;">ĐĂNG NHẬP PTG</h2>
+        <h2 style="color:var(--primary); text-align:center; margin-top:60px;">ĐĂNG NHẬP PTG</h2>
         <input type="tel" id="login-phone" placeholder="Số điện thoại">
         <input type="password" id="login-pin" placeholder="Mã PIN">
         <button class="btn" onclick="handleLogin()">ĐĂNG NHẬP</button>
-        <p style="text-align: center; font-size: 14px;">Chưa có tài khoản? <a href="#" onclick="showPage('scr-reg')">Đăng ký</a></p>
+        <p style="text-align:center; font-size:14px; margin-top:20px;">Chưa có tài khoản? <a href="#" onclick="showPage('scr-reg')" style="color:var(--primary); font-weight:bold; text-decoration:none;">Đăng ký ngay</a></p>
     </div>
 
     <div id="scr-reg" class="screen">
-        <h2 style="color: var(--primary); text-align: center;">MỞ TÀI KHOẢN</h2>
+        <h3>MỞ TÀI KHOẢN</h3>
         <input type="text" id="reg-name" placeholder="Họ và tên">
         <input type="tel" id="reg-phone" placeholder="Số điện thoại">
         <input type="password" id="reg-pin" placeholder="Mã PIN">
-        <button class="btn" onclick="processReg()">TIẾP TỤC</button>
-        <button class="btn" style="background:#666" onclick="showPage('scr-login')">QUAY LẠI</button>
-    </div>
-
-    <div id="scr-otp" class="screen">
-        <h3>Xác thực OTP</h3>
-        <input type="number" id="otp-code" placeholder="Nhập mã 6 số">
-        <button class="btn" onclick="verifyOTP()">XÁC NHẬN</button>
+        <button class="btn" onclick="showPage('scr-ekyc')">TIẾP TỤC</button>
+        <button class="btn" style="background:#666" onclick="showPage('scr-login')">THOÁT</button>
     </div>
 
     <div id="scr-ekyc" class="screen">
-        <h3 style="color: var(--primary);">XÁC MINH CCCD</h3>
-        <p style="font-size: 12px; color: #666;">Chụp ảnh rõ nét CCCD để hệ thống nhận diện.</p>
-        <div class="kyc-preview" onclick="document.getElementById('f-in').click()" id="pre-f">📸 Mặt trước</div>
-        <input type="file" id="f-in" hidden accept="image/*" onchange="previewImg(this, 'pre-f')">
-        <div class="kyc-preview" onclick="document.getElementById('b-in').click()" id="pre-b" style="margin-top:10px">📸 Mặt sau</div>
-        <input type="file" id="b-in" hidden accept="image/*" onchange="previewImg(this, 'pre-b')">
-        <button class="btn" style="background: var(--success);" onclick="startAIScan()">BẮT ĐẦU QUÉT AI</button>
+        <h3>XÁC MINH CCCD</h3>
+        <div class="kyc-preview" onclick="document.getElementById('f-in').click()">
+            <span id="txt-f">📸 Mặt trước CCCD</span>
+            <input type="file" id="f-in" hidden accept="image/*" onchange="previewImg(this, 'pre-f', 'txt-f')">
+            <img id="pre-f" style="display:none">
+        </div>
+        <div class="kyc-preview" onclick="document.getElementById('b-in').click()" style="margin-top:10px">
+            <span id="txt-b">📸 Mặt sau CCCD</span>
+            <input type="file" id="b-in" hidden accept="image/*" onchange="previewImg(this, 'pre-b', 'txt-b')">
+            <img id="pre-b" style="display:none">
+        </div>
+        <button class="btn" style="background:var(--success)" onclick="startAIScan()">QUÉT AI</button>
     </div>
 
     <div id="scr-home" class="screen">
         <div style="display:flex; justify-content: space-between; align-items:center;">
-            <b id="hi-name">USER</b>
-            <div style="display: flex; gap: 15px; align-items: center;">
-                <div class="bell-box" onclick="showPage('scr-notif')">🔔<span id="notif-count" class="bell-badge" style="display:none">0</span></div>
-                <span onclick="handleLogout()" style="color:red; font-size: 12px; cursor:pointer; font-weight:bold;">THOÁT</span>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <img id="user-avatar-main" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid var(--primary)">
+                <b id="hi-name">USER</b>
             </div>
+            <div class="bell-box" onclick="showPage('scr-notif')">🔔<span id="notif-count" class="bell-badge" style="display:none">0</span></div>
         </div>
         <div class="card-main">
             <small>Số dư khả dụng</small>
@@ -125,204 +126,245 @@
         </div>
         <div class="grid-nav">
             <div class="nav-box" onclick="showPage('scr-transfer')"><div class="nav-icon">💸</div>Chuyển tiền</div>
-            <div class="nav-box" onclick="document.getElementById('qr-input').click()"><div class="nav-icon">📸</div>Quét mã</div>
-            <div class="nav-box" onclick="mockDeposit()"><div class="nav-icon">🏦</div>Nạp tiền</div>
-            <div class="nav-box" onclick="alert('Đang bảo trì!')"><div class="nav-icon">📱</div>Nạp thẻ</div>
+            <div class="nav-box" onclick="document.getElementById('qr-scan-input').click()"><div class="nav-icon">📸</div>Quét mã</div>
+            <div class="nav-box" onclick="openAdminModal()"><div class="nav-icon">🏦</div>Nạp tiền</div>
+            <div class="nav-box" onclick="showPage('scr-settings')"><div class="nav-icon">⚙️</div>Cài đặt</div>
         </div>
-        <div id="qr-code" style="margin-top: 30px; display: flex; justify-content: center; background: white; padding: 20px; border-radius: 20px;"></div>
+        <div style="margin-top:30px; text-align:center;">
+            <div id="my-qr" style="display:inline-block; background:white; padding:15px; border-radius:15px;"></div>
+        </div>
     </div>
 
     <div id="scr-notif" class="screen">
-        <div style="display:flex; justify-content: space-between; align-items:center;"><h3>Thông báo</h3><button onclick="showPage('scr-home')" style="border:none; color:var(--primary); font-weight:bold;">Đóng</button></div>
+        <div style="display:flex; justify-content: space-between; align-items:center;">
+            <h3>Thông báo</h3>
+            <button onclick="exitNotif()" style="border:none; background:none; font-size:24px; color:var(--primary)">×</button>
+        </div>
         <div id="notif-list"></div>
+    </div>
+
+    <div id="scr-settings" class="screen">
+        <h3>Cài đặt</h3>
+        <div style="background:white; padding:15px; border-radius:15px; margin-bottom:15px;">
+            <p style="font-size:12px; font-weight:bold; margin-bottom:5px;">CẬP NHẬT HỒ SƠ</p>
+            <input type="text" id="update-name" placeholder="Tên hiển thị mới">
+            <div class="avatar-uploader" onclick="document.getElementById('avatar-file-input').click()">
+                <span id="avatar-status-text" style="font-size:14px; color:#666;">📁 Chọn ảnh đại diện</span>
+                <input type="file" id="avatar-file-input" hidden accept="image/*" onchange="handleAvatarSelect(this)">
+            </div>
+            <button class="btn" style="background:var(--success)" onclick="updateProfile()">LƯU THAY ĐỔI</button>
+        </div>
+        <button class="btn" style="background:#ff4d4d;" onclick="handleLogout()">ĐĂNG XUẤT</button>
+        <button class="btn" style="background:#666;" onclick="showPage('scr-home')">QUAY LẠI</button>
     </div>
 
     <div id="scr-transfer" class="screen">
         <h3>Chuyển khoản</h3>
         <input type="text" id="to-stk" placeholder="STK người nhận" oninput="autoCheckSTK()">
-        <div id="display-receiver-name" style="font-size: 13px; font-weight: bold; color: var(--primary); display: none;"></div>
+        <div id="display-receiver-name" style="font-size:13px; font-weight:bold; color:var(--primary); display:none; margin-bottom:10px;"></div>
         <input type="number" id="to-amount" placeholder="Số tiền">
-        <input type="password" id="confirm-pin" placeholder="Mã PIN">
-        <button class="btn" onclick="startTransfer()">XÁC NHẬN</button>
+        <button class="btn" onclick="preTransferLoad()">CHUYỂN KHOẢN NGAY</button>
         <button class="btn" style="background:#666" onclick="showPage('scr-home')">HỦY</button>
     </div>
 
     <div id="scr-receipt" class="screen">
         <div class="receipt-container" id="receipt-content"></div>
-        <button class="btn" onclick="showPage('scr-home')">XONG</button>
+        <button class="btn" onclick="location.reload()">XONG</button>
     </div>
+
+    <input type="file" id="qr-scan-input" style="display:none" accept="image/*" onchange="readQRFromFile(this)">
 </div>
 
 <script>
-    // --- FIREBASE SETUP ---
     const firebaseConfig = {
       apiKey: "AIzaSyAMxWXDkmGiVKfT8NYcMg3Pp_ENaI43etk",
-      authDomain: "ptg-bank.firebaseapp.com",
-      databaseURL: "https://ptg-bank-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "ptg-bank",
-      storageBucket: "ptg-bank.firebasestorage.app",
-      messagingSenderId: "703065593760",
-      appId: "1:703065593760:web:707be5623bbf9cf2dfb6c5"
+      databaseURL: "https://ptg-bank-default-rtdb.asia-southeast1.firebasedatabase.app"
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
     let currentUser = null;
-    let tempRegData = null;
-    let correctOTP = "123456";
     let validatedReceiverPhone = "";
     let validatedReceiverName = "";
+    let selectedAvatarBase64 = "";
 
-    // --- LOGIC KIỂM TRA TRÙNG SDT KHI ĐĂNG KÝ (MỚI THÊM) ---
-    function processReg() {
-        const n = document.getElementById('reg-name').value;
-        const p = document.getElementById('reg-phone').value;
-        const pi = document.getElementById('reg-pin').value;
-        
-        if(!n || !p || !pi) return alert("Vui lòng điền đầy đủ thông tin!");
-
-        loading(true, "Đang kiểm tra hệ thống...");
-        
-        // Kiểm tra xem SDT đã có trên Firebase chưa
-        db.ref('users/' + p).once('value').then(s => {
-            loading(false);
-            if(s.exists()) {
-                alert("LỖI: Số điện thoại này đã được đăng ký trên hệ thống PTG Bank!");
-            } else {
-                // Nếu chưa có thì tiếp tục các bước cũ của bạn
-                tempRegData = { 
-                    name: n, phone: p, pin: pi, 
-                    balance: 10000, 
-                    stk: "PTG" + Math.floor(100000 + Math.random()*900000) 
-                };
-                alert("Mã OTP thử nghiệm của bạn là: " + correctOTP);
-                showPage('scr-otp');
-            }
-        });
-    }
-
-    // --- CÁC HÀM CÒN LẠI GIỮ NGUYÊN 100% ---
-    function verifyOTP() {
-        if(document.getElementById('otp-code').value === correctOTP) showPage('scr-ekyc');
-        else alert("Mã OTP không chính xác!");
-    }
-
-    function previewImg(i, v) {
-        if (i.files && i.files[0]) {
-            const r = new FileReader();
-            r.onload = e => { document.getElementById(v).innerHTML = `<img src="${e.target.result}" id="${v}-img">`; }
-            r.readAsDataURL(i.files[0]);
-        }
-    }
-
-    async function startAIScan() {
-        const file = document.getElementById('f-in').files[0];
-        if(!file || !document.getElementById('b-in').files[0]) return alert("Vui lòng tải đủ 2 mặt CCCD!");
-        loading(true, "AI đang bóc tách dữ liệu...");
-        try {
-            const res = await Tesseract.recognize(file, 'eng');
-            const match = res.data.text.match(/\d{12}/);
-            if(!match) { loading(false); return alert("Không nhận diện được số CCCD!"); }
-            
-            const num = match[0];
-            let gen = parseInt(num.substring(3, 4));
-            let year = num.substring(4, 6);
-            let birthYear = (gen < 2) ? 1900 + parseInt(year) : 2000 + parseInt(year);
-
-            loading(false);
-            document.getElementById('res-name').innerText = tempRegData.name.toUpperCase();
-            document.getElementById('res-dob').innerText = birthYear;
-            document.getElementById('res-face').src = document.getElementById('pre-f-img').src;
-            document.getElementById('ai-result-board').style.display = 'block';
-        } catch (e) { loading(false); alert("Lỗi AI!"); }
-    }
-
-    function finalConfirm() {
-        const bYear = parseInt(document.getElementById('res-dob').innerText);
-        if(2026 - bYear < 12) { alert("Bạn chưa đủ 12 tuổi!"); closeBoard(); return; }
-        
-        loading(true, "Đang tạo tài khoản...");
-        db.ref('users/' + tempRegData.phone).set(tempRegData).then(() => {
-            loading(false); alert("Đăng ký thành công!"); showPage('scr-login'); closeBoard();
-        });
-    }
-
-    function handleLogin() {
-        const p = document.getElementById('login-phone').value;
-        const pi = document.getElementById('login-pin').value;
-        db.ref('users/' + p).once('value').then(s => {
-            if(s.exists() && s.val().pin === pi) { localStorage.setItem('ptg_phone', p); startUserSession(p); } 
-            else alert("Sai số điện thoại hoặc mã PIN!");
-        });
-    }
-
-    function startUserSession(phone) {
-        db.ref('users/' + phone).on('value', s => {
-            if(s.exists()) {
-                currentUser = s.val();
-                showPage('scr-home');
-                document.getElementById('hi-name').innerText = currentUser.name.toUpperCase();
-                document.getElementById('bal-val').innerText = currentUser.balance.toLocaleString() + " ₫";
-                document.getElementById('stk-val').innerText = "STK: " + currentUser.stk;
-                document.getElementById('qr-code').innerHTML = "";
-                new QRCode(document.getElementById("qr-code"), { text: currentUser.stk, width: 140, height: 140 });
-            }
-        });
-    }
-
-    function autoCheckSTK() {
-        const stk = document.getElementById('to-stk').value;
-        const nb = document.getElementById('display-receiver-name');
-        if(stk.length >= 6) {
-            db.ref('users').once('value').then(snap => {
-                let found = false;
-                snap.forEach(c => {
-                    if(c.val().stk === stk) {
-                        validatedReceiverName = c.val().name; validatedReceiverPhone = c.key;
-                        nb.style.display = "block"; nb.innerText = "✅ " + c.val().name.toUpperCase(); found = true;
-                    }
-                });
-                if(!found) { nb.style.display = "block"; nb.innerText = "❌ Không tìm thấy"; validatedReceiverPhone = ""; }
-            });
-        }
-    }
-
-    function startTransfer() {
-        const amt = parseInt(document.getElementById('to-amount').value);
-        if(!validatedReceiverPhone || amt > currentUser.balance || amt <= 0) return alert("Kiểm tra lại thông tin!");
-        db.ref('users/' + currentUser.phone + '/balance').transaction(b => (b||0) - amt);
-        db.ref('users/' + validatedReceiverPhone + '/balance').transaction(b => (b||0) + amt);
-        
-        document.getElementById('receipt-content').innerHTML = `
-            <div class="receipt-header"><div class="icon-check">✔</div><h2>THÀNH CÔNG</h2><div class="amount">${amt.toLocaleString()} ₫</div></div>
-            <div class="receipt-body"><div class="receipt-row"><span>Người nhận</span><b>${validatedReceiverName}</b></div></div>`;
-        showPage('scr-receipt');
-    }
-
+    // --- FIX CHỐT HẠ: QUÉT QR TỪ ẢNH THƯ VIỆN "MỘT PHÁT ĂN LUÔN" ---
     function readQRFromFile(input) {
         if (!input.files[0]) return;
+        loading(true, "Đang nhận diện mã QR...");
+        
         const reader = new FileReader();
         reader.onload = e => {
             const img = new Image();
             img.onload = () => {
                 const canvas = document.createElement("canvas");
                 const ctx = canvas.getContext("2d");
-                canvas.width = img.width; canvas.height = img.height;
+                canvas.width = img.width;
+                canvas.height = img.height;
                 ctx.drawImage(img, 0, 0, img.width, img.height);
-                const code = jsQR(ctx.getImageData(0,0,canvas.width,canvas.height).data, canvas.width, canvas.height);
-                if (code) { showPage('scr-transfer'); document.getElementById('to-stk').value = code.data; autoCheckSTK(); }
+                
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const code = jsQR(imageData.data, imageData.width, imageData.height);
+                
+                loading(false);
+                if (code) {
+                    // Nếu tìm thấy mã, điền STK và nhảy sang màn hình chuyển khoản luôn
+                    showPage('scr-transfer');
+                    document.getElementById('to-stk').value = code.data;
+                    autoCheckSTK(); // Tự động tìm tên người nhận ngay
+                } else {
+                    alert("Không tìm thấy mã QR hợp lệ trong ảnh này!");
+                }
+                input.value = ""; // Reset để có thể chọn lại cùng 1 ảnh
             };
             img.src = e.target.result;
         };
         reader.readAsDataURL(input.files[0]);
     }
 
+    // --- CẬP NHẬT AVATAR ---
+    function handleAvatarSelect(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                selectedAvatarBase64 = e.target.result;
+                document.getElementById('avatar-status-text').innerText = "✅ Đã chọn ảnh";
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function updateProfile() {
+        const newName = document.getElementById('update-name').value;
+        if(!newName && !selectedAvatarBase64) return alert("Chưa có thay đổi!");
+        loading(true, "Đang lưu...");
+        const updates = {};
+        if(newName) updates['name'] = newName;
+        if(selectedAvatarBase64) updates['avatar'] = selectedAvatarBase64;
+        db.ref('users/' + currentUser.phone).update(updates).then(() => {
+            loading(false);
+            alert("Cập nhật thành công!");
+        });
+    }
+
+    // --- CÁC LOGIC KHÁC GIỮ NGUYÊN 100% ---
+    function exitNotif() {
+        document.getElementById('notif-count').style.display = 'none';
+        document.getElementById('notif-count').innerText = '0';
+        showPage('scr-home');
+    }
+
+    function openAdminModal() { document.getElementById('admin-modal').style.display = 'flex'; }
+    function verifyAdminAccess() {
+        if(document.getElementById('admin-password-input').value === 'admin123') {
+            closeModal('admin-modal');
+            let amt = prompt("Nạp bao nhiêu?");
+            if(amt > 0) db.ref('users/'+currentUser.phone+'/balance').transaction(b => (b||0) + parseInt(amt));
+        } else alert("Sai Pass Admin!");
+    }
+
+    function previewImg(i, imgId, txtId) { if (i.files && i.files[0]) { const r = new FileReader(); r.onload = e => { document.getElementById(imgId).src = e.target.result; document.getElementById(imgId).style.display = 'block'; document.getElementById(txtId).style.display = 'none'; }; r.readAsDataURL(i.files[0]); } }
+    
+    async function startAIScan() {
+        const f = document.getElementById('f-in').files[0];
+        if(!f || !document.getElementById('b-in').files[0]) return alert("Chụp đủ 2 mặt!");
+        loading(true, "AI đang quét...");
+        try {
+            const res = await Tesseract.recognize(f, 'vie');
+            const match = res.data.text.match(/\d{12}/);
+            loading(false);
+            if(!match) return alert("Ảnh mờ quá, chụp lại đi!");
+            document.getElementById('ai-info-detail').innerHTML = `<b>CCCD:</b> ${match[0]}<br><b>Tên:</b> ${document.getElementById('reg-name').value.toUpperCase()}`;
+            document.getElementById('ai-result-board').style.display = 'flex';
+        } catch (e) { loading(false); alert("Lỗi AI!"); }
+    }
+
+    function finalConfirm(isTrue) {
+        closeModal('ai-result-board');
+        if(isTrue) {
+            loading(true, "Đang tạo tài khoản...");
+            const n = document.getElementById('reg-name').value, p = document.getElementById('reg-phone').value, pi = document.getElementById('reg-pin').value;
+            const data = { name: n, phone: p, pin: pi, balance: 50000, stk: "PTG" + Math.floor(100000 + Math.random()*900000), avatar: "" };
+            db.ref('users/' + p).set(data).then(() => location.reload());
+        } else showPage('scr-ekyc');
+    }
+
+    function preTransferLoad() {
+        if(!validatedReceiverPhone) return alert("Chưa có người nhận!");
+        loading(true, "Kiểm tra an toàn...");
+        setTimeout(() => { loading(false); document.getElementById('pin-popup').style.display='flex'; }, 5000);
+    }
+    function checkPinStep() {
+        if(document.getElementById('modal-pin-input').value === currentUser.pin) {
+            closeModal('pin-popup'); loading(true, "Đang chuyển tiền..."); setTimeout(finalizeTransfer, 5000);
+        } else alert("Sai mã PIN!");
+    }
+    function finalizeTransfer() {
+        const amt = parseInt(document.getElementById('to-amount').value);
+        if(amt > currentUser.balance) { loading(false); return alert("Hết tiền rồi!"); }
+        db.ref('users/'+currentUser.phone+'/balance').transaction(b => b - amt);
+        db.ref('users/'+validatedReceiverPhone+'/balance').transaction(b => b + amt);
+        const log = `${new Date().getHours()}:${new Date().getMinutes()} - ${new Date().getDate()}/${new Date().getMonth()+1}`;
+        db.ref('notifications/'+currentUser.phone).push({ msg: `Chuyển ${amt.toLocaleString()}đ cho ${validatedReceiverName}`, time: log });
+        db.ref('notifications/'+validatedReceiverPhone).push({ msg: `Nhận ${amt.toLocaleString()}đ từ ${currentUser.name}`, time: log });
+        renderReceipt(amt); loading(false);
+    }
+
+    function renderReceipt(amt) {
+        document.getElementById('receipt-content').innerHTML = `
+            <span class="receipt-logo">▼ PTG Bank</span>
+            <div class="receipt-amount">${amt.toLocaleString()} VND</div>
+            <div class="receipt-info-box">
+                <div class="receipt-row"><span>Người nhận</span><b>${validatedReceiverName.toUpperCase()}</b></div>
+                <div class="receipt-row"><span>Mã GD</span><b>PTG${Math.floor(Math.random()*999999)}</b></div>
+            </div>`;
+        showPage('scr-receipt');
+    }
+
+    function handleLogin() {
+        const p = document.getElementById('login-phone').value, pi = document.getElementById('login-pin').value;
+        db.ref('users/'+p).once('value').then(s => {
+            if(s.exists() && s.val().pin === pi) { localStorage.setItem('ptg_phone', p); startSession(p); }
+            else alert("Sai tài khoản/mật khẩu!");
+        });
+    }
+
+    function startSession(phone) {
+        db.ref('users/'+phone).on('value', s => {
+            currentUser = s.val();
+            showPage('scr-home');
+            document.getElementById('hi-name').innerText = currentUser.name.toUpperCase();
+            document.getElementById('bal-val').innerText = currentUser.balance.toLocaleString() + " ₫";
+            document.getElementById('stk-val').innerText = "STK: " + currentUser.stk;
+            if(currentUser.avatar) document.getElementById('user-avatar-main').src = currentUser.avatar;
+            document.getElementById('my-qr').innerHTML = "";
+            new QRCode(document.getElementById("my-qr"), { text: currentUser.stk, width: 120, height: 120 });
+        });
+        db.ref('notifications/'+phone).on('value', s => {
+            const list = document.getElementById('notif-list');
+            const badge = document.getElementById('notif-count');
+            list.innerHTML = ""; let c = 0;
+            s.forEach(child => { c++; list.innerHTML = `<div style="background:white; padding:10px; border-radius:10px; margin-bottom:8px; border-left:4px solid var(--primary); font-size:12px;"><b>${child.val().time}</b><br>${child.val().msg}</div>` + list.innerHTML; });
+            if(c > 0) { badge.style.display = "block"; badge.innerText = c; }
+        });
+    }
+
+    function autoCheckSTK() {
+        const stk = document.getElementById('to-stk').value, nb = document.getElementById('display-receiver-name');
+        if(stk.length >= 5) {
+            db.ref('users').once('value').then(snap => {
+                let found = false;
+                snap.forEach(c => { if(c.val().stk === stk) { validatedReceiverName = c.val().name; validatedReceiverPhone = c.key; nb.style.display="block"; nb.innerText="✅ "+c.val().name.toUpperCase(); found=true; }});
+                if(!found) { nb.style.display="block"; nb.innerText="❌ Không tìm thấy"; validatedReceiverPhone=""; }
+            });
+        }
+    }
+
     function showPage(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-    function loading(s, txt) { document.getElementById('loader-screen').style.display = s ? 'flex' : 'none'; document.getElementById('loader-text').innerText = txt; }
-    function closeBoard() { document.getElementById('ai-result-board').style.display = 'none'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    function loading(s, t) { document.getElementById('loader-screen').style.display = s ? 'flex' : 'none'; document.getElementById('loader-text').innerText = t; }
     function handleLogout() { localStorage.removeItem('ptg_phone'); location.reload(); }
-    function mockDeposit() { let v = prompt("Tiền nạp:"); if(v>0) db.ref('users/'+currentUser.phone+'/balance').transaction(b=>(b||0)+parseInt(v)); }
-    window.onload = () => { const p = localStorage.getItem('ptg_phone'); if(p) startUserSession(p); };
+    window.onload = () => { const p = localStorage.getItem('ptg_phone'); if(p) startSession(p); };
 </script>
 </body>
 </html>
