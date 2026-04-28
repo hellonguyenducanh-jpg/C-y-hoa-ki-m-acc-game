@@ -19,19 +19,51 @@
         .screen { display: none; padding: 20px; height: 100%; overflow-y: auto; }
         .active { display: block; }
         
+        /* --- PHẦN CHỈNH SỬA: GIAO DIỆN BILL VCB --- */
+        #scr-receipt { padding: 0; background: #011627; }
+        .receipt-container { 
+            background: #011627; 
+            min-height: 100%; 
+            color: white; 
+            text-align: center; 
+            position: relative;
+            padding: 40px 20px;
+        }
+        .vcb-header { margin-bottom: 20px; font-weight: bold; font-size: 18px; letter-spacing: 1px; }
+        .vcb-check { 
+            width: 50px; height: 50px; background: #76b82a; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            margin: 0 auto 15px; font-size: 24px; color: white;
+        }
+        .vcb-status { color: #ffffff; font-size: 14px; text-transform: uppercase; margin-bottom: 5px; opacity: 0.9; }
+        .vcb-amount { color: #76b82a; font-size: 28px; font-weight: bold; margin-bottom: 5px; }
+        .vcb-time { font-size: 12px; color: #aaa; margin-bottom: 30px; }
+        
+        .vcb-info-table { text-align: left; border-top: 0.5px solid rgba(255,255,255,0.1); }
+        .vcb-row { 
+            display: flex; justify-content: space-between; align-items: flex-start;
+            padding: 15px 0; border-bottom: 0.5px solid rgba(255,255,255,0.1); 
+            font-size: 14px; 
+        }
+        .vcb-label { color: #aaa; width: 40%; }
+        .vcb-value { color: #fff; width: 60%; text-align: right; font-weight: 500; }
+        
+        .vcb-footer-bg {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 150px;
+            background: linear-gradient(transparent, #004a1a); opacity: 0.4; pointer-events: none;
+        }
+        .vcb-btn-home {
+            position: relative; z-index: 10; width: 90%; background: #76b82a; 
+            color: white; border: none; padding: 15px; border-radius: 8px;
+            font-weight: bold; margin: 20px auto; display: block; cursor: pointer;
+        }
+        /* --- KẾT THÚC PHẦN CSS BILL --- */
+
         .modal-overlay { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.8); z-index: 5000; align-items: center; justify-content: center; }
         .modal-box { background: white; width: 85%; padding: 25px; border-radius: 15px; text-align: center; }
-
-        .receipt-container { background: #241c39; border-radius: 20px; padding: 30px 20px; color: white; text-align: center; margin-top: 10px; }
-        .receipt-logo { color: #f39200; font-weight: 800; font-size: 22px; margin-bottom: 20px; display: block; }
-        .receipt-amount { font-size: 30px; font-weight: bold; margin-bottom: 10px; }
-        .receipt-info-box { border-top: 0.5px solid rgba(255,255,255,0.1); padding-top: 20px; text-align: left; }
-        .receipt-row { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; }
-
         #loader-screen { display: none; position: absolute; inset: 0; background: rgba(255,255,255,0.9); z-index: 6000; flex-direction: column; align-items: center; justify-content: center; }
         .spinner { width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
         input { width: 100%; padding: 14px; margin: 8px 0; border-radius: 10px; border: 1px solid #ddd; font-size: 16px; }
         .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; background: var(--primary); color: white; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .card-main { background: linear-gradient(135deg, #004aad, #00c6ff); color: white; padding: 25px; border-radius: 20px; margin: 15px 0; }
@@ -40,10 +72,8 @@
         .nav-icon { background: white; width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 5px; font-size: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .bell-box { position: relative; font-size: 24px; cursor: pointer; }
         .bell-badge { position: absolute; top: -5px; right: -5px; background: red; color: white; font-size: 10px; padding: 2px 5px; border-radius: 50%; border: 2px solid var(--bg); }
-        
         .kyc-preview { width:100%; height:120px; border: 2px dashed #ccc; border-radius: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #eee; margin-top: 5px; cursor: pointer; position: relative; }
         .kyc-preview img { width: 100%; height: 100%; object-fit: cover; position: absolute; }
-        
         .avatar-uploader { border: 1px solid #ddd; padding: 10px; border-radius: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; background: #f9f9f9; }
     </style>
 </head>
@@ -58,7 +88,6 @@
             <button class="btn" style="background:#eee; color:#333" onclick="closeModal('admin-modal')">HỦY</button>
         </div>
     </div>
-
     <div id="pin-popup" class="modal-overlay">
         <div class="modal-box">
             <h3>Xác thực giao dịch</h3>
@@ -67,7 +96,6 @@
             <button class="btn" style="background:#eee; color:#333" onclick="closeModal('pin-popup')">HỦY</button>
         </div>
     </div>
-
     <div id="ai-result-board" class="modal-overlay">
         <div class="modal-box">
             <h3 style="color: var(--primary); margin-top: 0;">XÁC THỰC AI</h3>
@@ -76,14 +104,13 @@
             <button class="btn" style="background:#ccc; color:#333; margin-top:5px;" onclick="finalConfirm(false)">CHỤP LẠI</button>
         </div>
     </div>
-
     <div id="loader-screen"><div class="spinner"></div><p id="loader-text" style="margin-top:15px; font-weight:bold;"></p></div>
 
     <div id="scr-login" class="screen active">
         <h2 style="color:var(--primary); text-align:center; margin-top:60px;">ĐĂNG NHẬP PTG</h2>
         <input type="tel" id="login-phone" placeholder="Số điện thoại">
         <input type="password" id="login-pin" placeholder="Mã PIN">
-        <button class="btn" onclick="handleLogin()">ĐĂNG NHẬP</button>
+        <button class="btn" onclick="callSystemAuth('LOGIN')">ĐĂNG NHẬP</button>
         <p style="text-align:center; font-size:14px; margin-top:20px;">Chưa có tài khoản? <a href="#" onclick="showPage('scr-reg')" style="color:var(--primary); font-weight:bold; text-decoration:none;">Đăng ký ngay</a></p>
     </div>
 
@@ -92,7 +119,7 @@
         <input type="text" id="reg-name" placeholder="Họ và tên">
         <input type="tel" id="reg-phone" placeholder="Số điện thoại">
         <input type="password" id="reg-pin" placeholder="Mã PIN">
-        <button class="btn" onclick="showPage('scr-ekyc')">TIẾP TỤC</button>
+        <button class="btn" onclick="callSystemAuth('REG')">TIẾP TỤC</button>
         <button class="btn" style="background:#666" onclick="showPage('scr-login')">THOÁT</button>
     </div>
 
@@ -163,13 +190,13 @@
         <input type="text" id="to-stk" placeholder="STK người nhận" oninput="autoCheckSTK()">
         <div id="display-receiver-name" style="font-size:13px; font-weight:bold; color:var(--primary); display:none; margin-bottom:10px;"></div>
         <input type="number" id="to-amount" placeholder="Số tiền">
-        <button class="btn" onclick="preTransferLoad()">CHUYỂN KHOẢN NGAY</button>
+        <button class="btn" onclick="callSystemAuth('TRANSFER')">CHUYỂN KHOẢN NGAY</button>
         <button class="btn" style="background:#666" onclick="showPage('scr-home')">HỦY</button>
     </div>
 
     <div id="scr-receipt" class="screen">
-        <div class="receipt-container" id="receipt-content"></div>
-        <button class="btn" onclick="location.reload()">XONG</button>
+        <div class="receipt-container" id="receipt-content">
+            </div>
     </div>
 
     <input type="file" id="qr-scan-input" style="display:none" accept="image/*" onchange="readQRFromFile(this)">
@@ -188,41 +215,70 @@
     let validatedReceiverName = "";
     let selectedAvatarBase64 = "";
 
-    // --- FIX CHỐT HẠ: QUÉT QR TỪ ẢNH THƯ VIỆN "MỘT PHÁT ĂN LUÔN" ---
+    // --- HÀM XÁC THỰC VÂN TAY/KHUÔN MẶT HỆ THỐNG ---
+    async function callSystemAuth(action) {
+        if(action === 'LOGIN' && (!document.getElementById('login-phone').value || !document.getElementById('login-pin').value)) return alert("Vui lòng nhập đủ SĐT và PIN!");
+        if(action === 'REG' && !document.getElementById('reg-name').value) return alert("Vui lòng điền họ tên!");
+        if(action === 'TRANSFER' && (!validatedReceiverPhone || !document.getElementById('to-amount').value)) return alert("Vui lòng nhập thông tin người nhận!");
+
+        if (window.PublicKeyCredential) {
+            try {
+                const challenge = new Uint8Array(32);
+                window.crypto.getRandomValues(challenge);
+                const options = {
+                    publicKey: {
+                        challenge: challenge,
+                        rp: { name: "PTG Bank" },
+                        user: { id: new Uint8Array([1]), name: "user", displayName: "User" },
+                        pubKeyCredParams: [{ alg: -7, type: "public-key" }],
+                        authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required" },
+                        timeout: 60000
+                    }
+                };
+                const credential = await navigator.credentials.create(options);
+                if (credential) {
+                    if(action === 'LOGIN') handleLogin();
+                    if(action === 'REG') showPage('scr-ekyc');
+                    if(action === 'TRANSFER') preTransferLoad();
+                }
+            } catch (e) {
+                // Nếu bị hủy, không làm gì cả để người dùng có thể bấm lại
+                console.log("Xác thực bị dừng hoặc hủy.");
+            }
+        } else {
+            // Trường hợp trình duyệt/thiết bị không hỗ trợ thì chạy thẳng logic
+            if(action === 'LOGIN') handleLogin();
+            if(action === 'REG') showPage('scr-ekyc');
+            if(action === 'TRANSFER') preTransferLoad();
+        }
+    }
+
     function readQRFromFile(input) {
         if (!input.files[0]) return;
         loading(true, "Đang nhận diện mã QR...");
-        
         const reader = new FileReader();
         reader.onload = e => {
             const img = new Image();
             img.onload = () => {
                 const canvas = document.createElement("canvas");
                 const ctx = canvas.getContext("2d");
-                canvas.width = img.width;
-                canvas.height = img.height;
+                canvas.width = img.width; canvas.height = img.height;
                 ctx.drawImage(img, 0, 0, img.width, img.height);
-                
                 const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                 const code = jsQR(imageData.data, imageData.width, imageData.height);
-                
                 loading(false);
                 if (code) {
-                    // Nếu tìm thấy mã, điền STK và nhảy sang màn hình chuyển khoản luôn
                     showPage('scr-transfer');
                     document.getElementById('to-stk').value = code.data;
-                    autoCheckSTK(); // Tự động tìm tên người nhận ngay
-                } else {
-                    alert("Không tìm thấy mã QR hợp lệ trong ảnh này!");
-                }
-                input.value = ""; // Reset để có thể chọn lại cùng 1 ảnh
+                    autoCheckSTK();
+                } else alert("Không tìm thấy mã QR!");
+                input.value = "";
             };
             img.src = e.target.result;
         };
         reader.readAsDataURL(input.files[0]);
     }
 
-    // --- CẬP NHẬT AVATAR ---
     function handleAvatarSelect(input) {
         if (input.files && input.files[0]) {
             const reader = new FileReader();
@@ -247,7 +303,6 @@
         });
     }
 
-    // --- CÁC LOGIC KHÁC GIỮ NGUYÊN 100% ---
     function exitNotif() {
         document.getElementById('notif-count').style.display = 'none';
         document.getElementById('notif-count').innerText = '0';
@@ -292,13 +347,14 @@
     function preTransferLoad() {
         if(!validatedReceiverPhone) return alert("Chưa có người nhận!");
         loading(true, "Kiểm tra an toàn...");
-        setTimeout(() => { loading(false); document.getElementById('pin-popup').style.display='flex'; }, 5000);
+        setTimeout(() => { loading(false); document.getElementById('pin-popup').style.display='flex'; }, 3000);
     }
     function checkPinStep() {
         if(document.getElementById('modal-pin-input').value === currentUser.pin) {
-            closeModal('pin-popup'); loading(true, "Đang chuyển tiền..."); setTimeout(finalizeTransfer, 5000);
+            closeModal('pin-popup'); loading(true, "Đang chuyển tiền..."); setTimeout(finalizeTransfer, 2000);
         } else alert("Sai mã PIN!");
     }
+
     function finalizeTransfer() {
         const amt = parseInt(document.getElementById('to-amount').value);
         if(amt > currentUser.balance) { loading(false); return alert("Hết tiền rồi!"); }
@@ -311,13 +367,42 @@
     }
 
     function renderReceipt(amt) {
+        const now = new Date();
+        const timeStr = `${now.getHours()}:${now.getMinutes()} Thứ ${now.getDay() + 1 === 1 ? 'CN' : 'Hai'} ${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}`;
+        
         document.getElementById('receipt-content').innerHTML = `
-            <span class="receipt-logo">▼ PTG Bank</span>
-            <div class="receipt-amount">${amt.toLocaleString()} VND</div>
-            <div class="receipt-info-box">
-                <div class="receipt-row"><span>Người nhận</span><b>${validatedReceiverName.toUpperCase()}</b></div>
-                <div class="receipt-row"><span>Mã GD</span><b>PTG${Math.floor(Math.random()*999999)}</b></div>
-            </div>`;
+            <div class="vcb-header">PTG BANK</div>
+            <div class="vcb-check">✔</div>
+            <div class="vcb-status">Chuyển khoản thành công</div>
+            <div class="vcb-amount">${amt.toLocaleString()} VND</div>
+            <div class="vcb-time">${timeStr}</div>
+            
+            <div class="vcb-info-table">
+                <div class="vcb-row">
+                    <span class="vcb-label">Tên người thụ hưởng</span>
+                    <span class="vcb-value">${validatedReceiverName.toUpperCase()}</span>
+                </div>
+                <div class="vcb-row">
+                    <span class="vcb-label">Tài khoản thụ hưởng</span>
+                    <span class="vcb-value">${document.getElementById('to-stk').value}</span>
+                </div>
+                <div class="vcb-row">
+                    <span class="vcb-label">Ngân hàng thụ hưởng</span>
+                    <span class="vcb-value">PTG BANK</span>
+                </div>
+                <div class="vcb-row">
+                    <span class="vcb-label">Mã giao dịch</span>
+                    <span class="vcb-value">${Math.floor(Math.random()*900000000) + 100000000}</span>
+                </div>
+                <div class="vcb-row">
+                    <span class="vcb-label">Nội dung</span>
+                    <span class="vcb-value">${currentUser.name.toUpperCase()} chuyen tien</span>
+                </div>
+            </div>
+            
+            <div class="vcb-footer-bg"></div>
+            <button class="vcb-btn-home" onclick="location.reload()">Thực hiện giao dịch mới</button>
+        `;
         showPage('scr-receipt');
     }
 
